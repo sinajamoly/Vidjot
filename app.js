@@ -2,6 +2,7 @@ const express = require('express');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
 
 const app =express();
 //Map global promise
@@ -34,6 +35,9 @@ app.set('view engine', 'handlebars');
 // body parser middleware
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+//method Override middleware
+app.use(methodOverride('_method'))
 
 
 //middleware
@@ -108,6 +112,26 @@ app.get('/ideas', (req, res)=>{
 app.get('/home', (req,res)=>{
     res.send('home')
 });
+
+//Edit Form process
+app.put('/ideas/:id', (req,res)=>{
+    Idea.findOne({
+        _id: req.params.id
+    }).then(idea=>{
+        idea.title = req.body.title;
+        idea.details = req.body.details;
+        idea.save()
+            .then(idea =>{
+                res.redirect('/ideas')
+            });
+    })
+})
+
+app.delete('/ideas/:id',(req,res)=>{
+    Idea.remove({_id: req.params.id}).then(()=>{
+        res.redirect('/ideas');
+    })
+})
 
 const port = 5000;
 app.listen(port, ()=>{
