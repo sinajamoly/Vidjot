@@ -6,11 +6,13 @@ const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const flash = require('connect-flash');
 const session = require('express-session');
+const passport = require('passport');
 
 const app =express();
 // load routes
 const ideas = require('./routes/ideas');
 const users = require('./routes/users');
+require('./config/passport')(passport);
 
 //Map global promise
 mongoose.Promise =  global.Promise;
@@ -59,6 +61,10 @@ app.use(session({
     saveUninitialized: true
 }));
 
+// passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 // connect flash middleware
 app.use(flash());
 
@@ -67,6 +73,7 @@ app.use(function(req, res, next){
     res.locals.success_msg = req.flash('success_msg');
     res.locals.errors_msg = req.flash('error_msg');
     res.locals.error = req.flash('error');
+    res.locals.users = req.user || null;
     next();
 })
 
